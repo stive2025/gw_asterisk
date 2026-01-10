@@ -55,6 +55,9 @@ class AudioController extends Controller
             // Generar nombre único para el archivo
             $filename = $file->getClientOriginalName();
             $destinationPath = $publicPath . '/' . $filename;
+            
+            // Obtener tamaño ANTES de mover el archivo
+            $fileSize = $file->getSize();
 
             // Si el archivo ya existe, agregar timestamp
             if (File::exists($destinationPath)) {
@@ -78,7 +81,7 @@ class AudioController extends Controller
                     'url' => $publicUrl,
                     'filename' => $filename,
                     'original_name' => $file->getClientOriginalName(),
-                    'size' => $file->getSize(),
+                    'size' => $fileSize,
                     'date' => $date
                 ], 'El archivo ha sido subido correctamente');
             }
