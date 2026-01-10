@@ -17,12 +17,12 @@ class AudioController extends Controller
         try {
             // Validar que se haya enviado un archivo
             $request->validate([
-                'record' => 'required|file|mimes:mp3,wav,ogg,m4a,flac|max:51200', // max 50MB
+                'record' => 'required|file|mimes:mp3,wav,ogg,m4a,flac,webm|max:51200', // max 50MB
                 'date' => 'nullable|date_format:Y-m-d',
             ]);
 
             // Tipos de archivos de audio permitidos
-            $allowedTypes = ['mp3', 'wav', 'ogg', 'm4a', 'flac'];
+            $allowedTypes = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'webm'];
             
             $file = $request->file('record');
             $extension = strtolower($file->getClientOriginalExtension());
@@ -31,7 +31,7 @@ class AudioController extends Controller
             // Verificar extensión permitida
             if (!in_array($extension, $allowedTypes)) {
                 return ResponseBase::error(
-                    'Solo se permiten archivos de audio (mp3, wav, ogg, m4a, flac)',
+                    'Solo se permiten archivos de audio (mp3, wav, ogg, m4a, flac, webm)',
                     ['extension' => $extension],
                     422
                 );
