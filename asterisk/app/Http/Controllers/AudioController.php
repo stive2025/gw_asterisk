@@ -52,12 +52,24 @@ class AudioController extends Controller
                 Log::info('Created directory structure', ['path' => $publicPath]);
             }
 
+            // Obtener información del archivo ANTES de moverlo
+            try {
+                $originalName = $file->getClientOriginalName();
+                $fileSize = $file->getSize();
+            } catch (\Exception $e) {
+                Log::error('Error getting file information', [
+                    'error' => $e->getMessage()
+                ]);
+                return ResponseBase::error(
+                    'Error al obtener información del archivo',
+                    ['error' => $e->getMessage()],
+                    500
+                );
+            }
+
             // Generar nombre único para el archivo
-            $filename = $file->getClientOriginalName();
+            $filename = $originalName;
             $destinationPath = $publicPath . '/' . $filename;
-            
-            // Obtener tamaño ANTES de mover el archivo
-            $fileSize = $file->getSize();
 
             // Si el archivo ya existe, agregar timestamp
             if (File::exists($destinationPath)) {
@@ -66,24 +78,38 @@ class AudioController extends Controller
             }
 
             // Mover el archivo
-            if ($file->move($publicPath, $filename)) {
-                $publicUrl = url("{$relativePath}/{$filename}");
+            try {
+                $movedFile = $file->move($publicPath, $filename);
 
-                Log::info('Audio file uploaded successfully', [
-                    'destination' => $destinationPath,
-                    'url' => $publicUrl,
-                    'original_name' => $file->getClientOriginalName()
+                if ($movedFile) {
+                    $publicUrl = url("{$relativePath}/{$filename}");
+
+                    Log::info('Audio file uploaded successfully', [
+                        'destination' => $destinationPath,
+                        'url' => $publicUrl,
+                        'original_name' => $originalName
+                    ]);
+
+                    return ResponseBase::success([
+                        'path' => $destinationPath,
+                        'relative_path' => "{$relativePath}/{$filename}",
+                        'url' => $publicUrl,
+                        'filename' => $filename,
+                        'original_name' => $originalName,
+                        'size' => $fileSize,
+                        'date' => $date
+                    ], 'El archivo ha sido subido correctamente');
+                }
+            } catch (\Exception $e) {
+                Log::error('Error moving audio file', [
+                    'error' => $e->getMessage(),
+                    'destination' => $destinationPath
                 ]);
-
-                return ResponseBase::success([
-                    'path' => $destinationPath,
-                    'relative_path' => "{$relativePath}/{$filename}",
-                    'url' => $publicUrl,
-                    'filename' => $filename,
-                    'original_name' => $file->getClientOriginalName(),
-                    'size' => $fileSize,
-                    'date' => $date
-                ], 'El archivo ha sido subido correctamente');
+                return ResponseBase::error(
+                    'Error al mover el archivo',
+                    ['error' => $e->getMessage()],
+                    500
+                );
             }
 
             return ResponseBase::error(
