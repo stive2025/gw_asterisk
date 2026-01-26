@@ -30,6 +30,7 @@ trait UserMetricsTrait
             // Créditos asignados
             try {
                 $metrics['nro_credits'] = DB::table(env('MODEL_CREDIT'))
+                    ->where('sync_status', 'ACTIVE')
                     ->where('user_id', $userId)
                     ->where('business_id', $campain->business_id)
                     ->count();
@@ -63,7 +64,7 @@ trait UserMetricsTrait
                 $metrics['nro_gestions_efec'] = DB::table(env('MODEL_MANAGEMENT'))
                     ->where('user_id', $userId)
                     ->where('campain_id', $campain->id)
-                    ->whereIn('state', ['EFECTIVA', 'PROMESA_PAGO', 'COMPROMISO_PAGO'])
+                    ->whereIn('substate', ['OFERTA DE PAGO', 'CONVENIO DE PAGO', 'COMPROMISO DE PAGO'])
                     ->count();
             } catch (\Exception $e) {
                 $metrics['nro_gestions_efec'] = 0;
@@ -74,7 +75,7 @@ trait UserMetricsTrait
                 $metrics['nro_gestions_efec_dia'] = DB::table(env('MODEL_MANAGEMENT'))
                     ->where('user_id', $userId)
                     ->where('campain_id', $campain->id)
-                    ->whereIn('state', ['EFECTIVA', 'PROMESA_PAGO', 'COMPROMISO_PAGO'])
+                    ->whereIn('substate', ['OFERTA DE PAGO', 'CONVENIO DE PAGO', 'COMPROMISO DE PAGO'])
                     ->whereDate('created_at', $today)
                     ->count();
             } catch (\Exception $e) {
@@ -84,6 +85,7 @@ trait UserMetricsTrait
             // Créditos pendientes
             try {
                 $metrics['nro_pendientes'] = DB::table(env('MODEL_CREDIT'))
+                    ->where('sync_status', 'ACTIVE')
                     ->where('user_id', $userId)
                     ->where('business_id', $campain->business_id)
                     ->where('management_tray', 'PENDIENTE')
@@ -95,6 +97,7 @@ trait UserMetricsTrait
             // Créditos en proceso
             try {
                 $metrics['nro_proceso'] = DB::table(env('MODEL_CREDIT'))
+                    ->where('sync_status', 'ACTIVE')
                     ->where('user_id', $userId)
                     ->where('business_id', $campain->business_id)
                     ->where('management_tray', 'EN PROCESO')
@@ -106,6 +109,7 @@ trait UserMetricsTrait
             // Créditos en proceso del día
             try {
                 $metrics['nro_proceso_dia'] = DB::table(env('MODEL_CREDIT'))
+                    ->where('sync_status', 'ACTIVE')
                     ->where('user_id', $userId)
                     ->where('business_id', $campain->business_id)
                     ->where('management_tray', 'EN PROCESO')
