@@ -17,10 +17,10 @@ class AudioController extends Controller
         try {
             // Validar que se haya enviado un archivo
             $request->validate([
-                'record' => 'required|file|mimes:mp3,wav,ogg,m4a,flac,webm|max:102400', // max 50MB
+                'record' => 'required',
                 'date' => 'nullable|date_format:Y-m-d',
             ]);
-            
+
             // Tipos de archivos de audio permitidos
             $allowedTypes = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'webm'];
             
