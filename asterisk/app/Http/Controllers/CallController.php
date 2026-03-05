@@ -6,6 +6,7 @@ use App\Http\Responses\ResponseBase;
 use App\Services\AsteriskService;
 use App\Services\WebSocketService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -21,9 +22,11 @@ class CallController extends Controller
                 env('ASTERISK_PASSWORD')
             );
 
+            $code = $this->getRandomDidCode();
+
             $originate_call = $asterisk_service->originateCall(
                 $request->input('channel', ''),
-                $request->input('exten', ''),
+                $code . $request->input('exten', ''),
                 $request->input('context', ''),
                 $request->input('priority', '1'),
                 $request->input('application') ?? '',
@@ -131,5 +134,24 @@ class CallController extends Controller
                 500
             );
         }
+    }
+
+    private function getRandomDidCode(): string
+    {
+        $did = DB::table(env('MODEL_DID'))
+            ->where('is_active', false)
+            ->get()
+            ->shuffle()
+            ->first();
+
+        if ($did) {
+            DB::table(env('MODEL_DID'))
+                ->where('id', $did->id)
+                ->update(['is_active' => true]);
+
+            return $did->code;
+        }
+
+        return '';
     }
 }
