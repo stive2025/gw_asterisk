@@ -22,7 +22,7 @@ class CallController extends Controller
                 env('ASTERISK_PASSWORD')
             );
 
-            $code = $this->getRandomDidCode();
+            $code = $this->getRandomDidCode($request->input('user_id'));
 
             $originate_call = $asterisk_service->originateCall(
                 $request->input('channel', ''),
@@ -136,7 +136,7 @@ class CallController extends Controller
         }
     }
 
-    private function getRandomDidCode(): string
+    private function getRandomDidCode(?int $userId = null): string
     {
         $did = DB::table(env('MODEL_DID'))
             ->where('is_active', false)
@@ -147,7 +147,7 @@ class CallController extends Controller
         if ($did) {
             DB::table(env('MODEL_DID'))
                 ->where('id', $did->id)
-                ->update(['is_active' => true]);
+                ->update(['is_active' => true, 'user_id' => $userId]);
 
             return $did->code;
         }

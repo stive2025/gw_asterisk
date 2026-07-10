@@ -22,10 +22,10 @@ class WebSocketService
     /**
      * Create a new WebSocketService instance.
      *
-     * @param string $url WebSocket URL (e.g., wss://check.sefil.com.ec/ws)
+     * @param string $url WebSocket URL (e.g., wss://check.sefil.com.ec/ws/monitor)
      * @param array $options Connection options
      */
-    public function __construct(string $url = 'wss://check.sefil.com.ec/ws', array $options = [])
+    public function __construct(string $url = 'wss://check.sefil.com.ec/ws/monitor', array $options = [])
     {
         $this->url = $url;
         $this->options = array_merge([
