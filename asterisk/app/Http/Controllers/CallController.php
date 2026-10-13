@@ -138,18 +138,25 @@ class CallController extends Controller
 
     private function getRandomDidCode(?int $userId = null): string
     {
-        $did = DB::table(env('MODEL_DID'))
-            ->where('is_active', false)
-            ->get()
-            ->shuffle()
-            ->first();
+        // Si la base de datos falla, se genera la llamada sin DID en lugar de abortarla
+        try {
+            $did = DB::table(env('MODEL_DID'))
+                ->where('is_active', false)
+                ->inRandomOrder()
+                ->first();
 
-        if ($did) {
-            DB::table(env('MODEL_DID'))
-                ->where('id', $did->id)
-                ->update(['is_active' => true, 'user_id' => $userId]);
+            if ($did) {
+                DB::table(env('MODEL_DID'))
+                    ->where('id', $did->id)
+                    ->update(['is_active' => true, 'user_id' => $userId]);
 
-            return $did->code;
+                return $did->code;
+            }
+        } catch (\Exception $e) {
+            Log::warning('DID lookup failed, dialing without DID', [
+                'error' => $e->getMessage(),
+                'user_id' => $userId
+            ]);
         }
 
         return '';

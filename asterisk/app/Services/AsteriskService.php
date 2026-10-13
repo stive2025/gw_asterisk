@@ -101,7 +101,9 @@ class AsteriskService
 
             foreach($group_channels as $group){
                 $ch_sip=explode('!',$group)[0];
-                $ch_state=explode('!',$group)[5];
+                if($ch_sip===''){
+                    continue;
+                }
                 $ch_exten=(str_contains($ch_sip, 'SIP')) ? explode('/',$ch_sip)[1] : explode('-',$ch_sip)[0];
 
                 //|| $ch_state=='BUSY' || $ch_state=='Congestion'
